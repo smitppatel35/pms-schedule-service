@@ -1,9 +1,9 @@
 package com.pms.schedule.service.impl;
 
 import com.pms.schedule.dto.Medicines;
-import com.pms.schedule.dto.RepresentativeResponse;
 import com.pms.schedule.dto.ScheduleResponse;
 import com.pms.schedule.entity.Doctor;
+import com.pms.schedule.entity.Representative;
 import com.pms.schedule.exception.EmptyDateException;
 import com.pms.schedule.repository.DoctorsRepository;
 import com.pms.schedule.repository.MedicineRepository;
@@ -16,7 +16,10 @@ import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 @Service
 public class ScheduleServiceImpl implements ScheduleService {
@@ -39,14 +42,14 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     /**
      * BUGS:
-     *
-     *  Exception Handler
-     *  Swagger (Documentation)
-     *  Loggers
-     *  Test
-     *  Comments
-     *
-     *
+     * <p>
+     * Exception Handler
+     * Swagger (Documentation)
+     * Loggers
+     * Test
+     * Comments
+     * <p>
+     * <p>
      * JWT-TOKEN Forwarding for Authorization-service as "/auth/users" is secured end-point
      * IF 10 doctors are in the db, current logic displaying only first 5 docs are repeating
      */
@@ -55,7 +58,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     public List<ScheduleResponse> getSchedule(String scheduleStartDate) throws ParseException, EmptyDateException {
         logger.info("[schedule-service] [/RepSchedule/{scheduleStartDate}] Schedule start date received");
 
-        if(scheduleStartDate.isEmpty()){
+        if (scheduleStartDate.isEmpty()) {
             throw new EmptyDateException("Date  must be not empty");
         }
 
@@ -64,7 +67,8 @@ public class ScheduleServiceImpl implements ScheduleService {
         Date startDate = simpleDateFormat.parse(scheduleStartDate);
 
         logger.debug("[schedule-service] [/RepSchedule/{scheduleStartDate}] Representative retrieval operation started");
-        List<RepresentativeResponse> representatives = representativeRepository.getAllRepresentatives();
+        List<Representative> representatives = new ArrayList<>();
+        representativeRepository.findAll().forEach(representatives::add);
 
         logger.debug("[schedule-service] [/RepSchedule/{scheduleStartDate}] Medicines retrieval operation started");
         List<Medicines> allMedicines = medicineRepository.getAllMedicines();
@@ -87,14 +91,14 @@ public class ScheduleServiceImpl implements ScheduleService {
                 ScheduleResponse scheduleResponse = new ScheduleResponse();
 
                 scheduleResponse.setDate(simpleDateFormat.format(tempDate));
-                scheduleResponse.setRepresentativeName(representatives.get(days % repSize).getUsername());
+                scheduleResponse.setRepresentativeName(representatives.get(days % repSize).getRepresentativeName());
                 scheduleResponse.setContactNumber(doctorList.get(days).getContactNumber());
                 scheduleResponse.setDoctorName(doctorList.get(days).getDoctorName());
 
                 // Static Data need to change
                 StringBuilder med = new StringBuilder();
                 for (Medicines medicines : allMedicines) {
-                    if(medicines.getTargetAilments().equalsIgnoreCase(doctorList.get(days).getTreatingAilment())){
+                    if (medicines.getTargetAilments().equalsIgnoreCase(doctorList.get(days).getTreatingAilment())) {
                         med.append(medicines.getMedicineName());
                     }
                 }

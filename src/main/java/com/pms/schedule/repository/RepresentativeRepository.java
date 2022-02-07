@@ -1,14 +1,9 @@
 package com.pms.schedule.repository;
 
-import com.pms.schedule.dto.RepresentativeResponse;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
+import com.pms.schedule.entity.Representative;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
-@FeignClient(url = "http://localhost:8085/auth", name = "auth-service")
-public interface RepresentativeRepository {
-
-    @GetMapping("/users")
-    List<RepresentativeResponse> getAllRepresentatives();
+@Repository
+public interface RepresentativeRepository extends CrudRepository<Representative, Integer> {
 }
